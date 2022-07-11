@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NoobCoders
 {
-    public enum RoadMapKeysEnum
+    public enum RoadMapKeys
     {
         Obstacle = -1,
         Start = 0,

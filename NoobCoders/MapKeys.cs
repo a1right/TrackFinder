@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NoobCoders
 {
-    public enum MapKeysEnum
+    public enum MapKeys
     {
         ObstacleHorizontal = '-',
         ObstacleVertical = '|',

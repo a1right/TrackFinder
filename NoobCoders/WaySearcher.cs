@@ -8,7 +8,7 @@ namespace NoobCoders
 {
     internal class WaySearcher
     {
-        private string[,] _map;
+        private readonly string[,] _map;
         private Point[,] RoadMap { get; set; }
         private Point Start { get; set; }
         private Point Finish { get; set; }
@@ -22,53 +22,56 @@ namespace NoobCoders
             _map = map;
         }
 
+        public void SearchWay()
+        {
+            ReadMap();
+            FillRoadMap();
+            BackTrackRoad();
+            ShowTrackAnimationOnMap();
+        }
+
         private void ReadMap()
         {
             MapHeight = _map.GetLength(0);
             MapWidth = _map.GetLength(1);
-            CreateRoadMap();
+            RoadMap = new Point[MapHeight, MapWidth];
+
             for (int column = 0; column < MapHeight; column++)
             {
                 for (int row = 0; row < MapWidth; row++)
                 {
-                    if (_map[column, row] == ((char)MapKeysEnum.Start).ToString())
+                    if (_map[column, row] == ((char)MapKeys.Start).ToString())
                     {
-                        Start = new Point(column, row, true, (int)RoadMapKeysEnum.Start);
+                        Start = new Point(column, row, true, (int)RoadMapKeys.Start);
                         RoadMap[column, row] = Start;
                     }
-                    if (_map[column,row] == ((char)MapKeysEnum.Finish).ToString())
+                    if (_map[column,row] == ((char)MapKeys.Finish).ToString())
                     {
-                        Finish = new Point(column, row, false, (int)RoadMapKeysEnum.Finish);
+                        Finish = new Point(column, row, false, (int)RoadMapKeys.Finish);
                         RoadMap[column, row] = Finish;
                     }
-                    if (_map[column,row] == ((char)MapKeysEnum.ObstacleHorizontal).ToString())
+                    if (_map[column,row] == ((char)MapKeys.ObstacleHorizontal).ToString())
                     {
-                        RoadMap[column, row] = new Point(column, row, true, (int)RoadMapKeysEnum.Obstacle);
+                        RoadMap[column, row] = new Point(column, row, true, (int)RoadMapKeys.Obstacle);
                     }
-                    if (_map[column, row] == ((char)MapKeysEnum.ObstacleVertical).ToString())
+                    if (_map[column, row] == ((char)MapKeys.ObstacleVertical).ToString())
                     {
-                        RoadMap[column, row] = new Point(column, row, true, (int)RoadMapKeysEnum.Obstacle);
+                        RoadMap[column, row] = new Point(column, row, true, (int)RoadMapKeys.Obstacle);
                     }
                 }
             }
         }
 
-        private void CreateRoadMap()
-        {
-            RoadMap = new Point[MapHeight, MapWidth];
-        }
-
         private void FillRoadMap()
         {
             int currentMaxValue = Start.Value;
-            CheckNeighbors(Start);
-            while (!Finish.isChecked)
+            while (!Finish.IsChecked)
             {
                 for(int column = 0; column < MapHeight; column++)
                 {
                     for (int row = 0; row < MapWidth; row++)
                     {
-                        if (CheckPointExsist(column, row) && RoadMap[column, row].Value == currentMaxValue)
+                        if (IsCheckPointExists(column, row) && RoadMap[column, row].Value == currentMaxValue)
                         {
                             CheckNeighbors(RoadMap[column, row]);
                         }
@@ -91,7 +94,7 @@ namespace NoobCoders
                     {
                         if (RoadMap[column, row] == null)
                             continue;
-                        if (RoadMap[column, row].Value == currentMaxValue && Point.CheckPointIsNeighbor(currentPoint, RoadMap[column, row]))
+                        if (RoadMap[column, row].Value == currentMaxValue && Point.IsNeighborCheckPoint(currentPoint, RoadMap[column, row]))
                         {
                             trackList.Add(currentPoint);
                             currentPoint = RoadMap[column, row];
@@ -100,76 +103,49 @@ namespace NoobCoders
                     }
                 }
             }
+            trackList.RemoveAt(0);
             trackList.Reverse();
             RoadTrack = trackList;
         }
-        
-        private void CheckNeighbors(Point point)
-        {
-            CheckPoint(point, point.Column + 1, point.Row );
-            CheckPoint(point, point.Column + 1, point.Row + 1);
-            CheckPoint(point, point.Column , point.Row + 1);
-            CheckPoint(point, point.Column - 1, point.Row + 1);
-            CheckPoint(point, point.Column - 1, point.Row );
-            CheckPoint(point, point.Column - 1, point.Row - 1);
-            CheckPoint(point, point.Column , point.Row - 1);
-            CheckPoint(point, point.Column + 1, point.Row - 1);
-        }
-        private void CheckPoint(Point point, int columnToCheck, int rowToCheck)
-        {
-            if (CheckPointInBouns(columnToCheck, rowToCheck))
-            {
-                if (CheckPointExsist(columnToCheck, rowToCheck) && RoadMap[columnToCheck, rowToCheck].Value > (int)RoadMapKeysEnum.Obstacle)
-                {
-                    RoadMap[columnToCheck, rowToCheck].isChecked = true;
-                }
-                if (!CheckPointExsist(columnToCheck, rowToCheck))
-                    RoadMap[columnToCheck, rowToCheck] = new Point(columnToCheck, rowToCheck, true, point.Value + 1);
-            }
-        }
-
-        private bool CheckPointInBouns(int column, int row)
-        {
-            if (column >= MapHeight || column < 0)
-                return false;
-            if (row >= MapWidth || row < 0)
-                return false;
-            return true;  
-        }
-
-        private bool CheckPointExsist(int column, int row)
-        {
-            if (RoadMap[column, row] == null)
-                return false;
-            return true;
-        }
-        public void SearchWay()
-        {
-            ReadMap();
-            FillRoadMap();
-            BackTrackRoad();
-            ShowTrackAnimationOnMap();
-        }
-
         private void ShowTrackAnimationOnMap()
         {
             foreach (var point in RoadTrack)
             {
-                Console.Clear();
-                if (point.Value != Finish.Value)
-                    _map[point.Column, point.Row] = ((char)RoadMapKeysEnum.Track).ToString();
-                for (int column = 0; column < MapHeight; column++)
-                {
-                    Console.WriteLine();
-                    for (int row = 0; row < MapWidth; row++)
-                    {
-                        Console.Write(_map[column, row]);
-
-                    }
-                }
-                Thread.Sleep(10);
-                
+                Console.SetCursorPosition(point.Row, point.Column);
+                Console.Write((char)RoadMapKeys.Track);
+                Thread.Sleep(30);
             }
         }
+
+        private void CheckNeighbors(Point point)
+        {
+            CheckPoint(point.Column + 1, point.Row, point.Value);
+            CheckPoint(point.Column + 1, point.Row + 1, point.Value);
+            CheckPoint(point.Column , point.Row + 1, point.Value);
+            CheckPoint(point.Column - 1, point.Row + 1, point.Value);
+            CheckPoint(point.Column - 1, point.Row, point.Value);
+            CheckPoint(point.Column - 1, point.Row - 1, point.Value);
+            CheckPoint(point.Column , point.Row - 1, point.Value);
+            CheckPoint(point.Column + 1, point.Row - 1, point.Value);
+        }
+        private void CheckPoint(int columnToCheck, int rowToCheck, int currentPointValue)
+        {
+            if (!IsCheckPointInBounds(columnToCheck, rowToCheck)) return;
+
+            if (IsCheckPointExists(columnToCheck, rowToCheck) && RoadMap[columnToCheck, rowToCheck].Value > (int)RoadMapKeys.Obstacle)
+                RoadMap[columnToCheck, rowToCheck].IsChecked = true;
+
+            if (!IsCheckPointExists(columnToCheck, rowToCheck))
+                RoadMap[columnToCheck, rowToCheck] = new Point(columnToCheck, rowToCheck, true, currentPointValue + 1);
+        }
+
+        private bool IsCheckPointInBounds(int column, int row)
+        {
+            if (column >= MapHeight || column < 0)
+                return false;
+            return row < MapWidth && row >= 0;
+        }
+
+        private bool IsCheckPointExists(int column, int row) => RoadMap[column, row] != null;
     }
 }
