@@ -8,26 +8,23 @@ namespace NoobCoders
 {
     internal class Point
     {
+        public int Column { get; set; }
+        public int Row { get; set; }
+        public bool IsChecked { get; set; }
+        public int Value { get; set; }
+
         public Point(int column, int row, bool @checked, int value )        {
             Column = column;
             Row = row;
-            isChecked = @checked;
+            IsChecked = @checked;
             Value = value;
         }
 
-
-        public int Column { get; set; }
-        public int Row { get; set; }
-        public bool isChecked { get; set; }
-        public int Value { get; set; }
-
-        public static bool CheckPointIsNeighbor(Point point, Point neighbour)
+        public static bool IsNeighborCheckPoint(Point point, Point neighbour)
         {
             int columnDifference = Math.Abs(point.Column - neighbour.Column);
             int rowDifference = Math.Abs(point.Row - neighbour.Row);
-            if (columnDifference > 1 || rowDifference > 1)
-                return false;
-            return true;
+            return columnDifference <= 1 && rowDifference <= 1;
         }
     }
 }
